@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: authentication
+  labels:
+   name: authentication
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: deployment
+  namespace: authentication
+  labels:
+    app: authentication
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: authentication
+    spec:
+      containers:
+      - name: authentication
+        image: blueapp/authentication:0.0.2
+        ports:
+        - containerPort: 50051
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service
+  namespace: authentication
+  labels:
+    app: authentication
+spec:
+  type: ClusterIP
+  ports:
+  - port: 1295
+    targetPort: 50051
+  selector:
+    app: authentication
+  externalName: authentication

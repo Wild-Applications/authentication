@@ -3,18 +3,14 @@
 //Imports
 const grpc = require('grpc');
 const authenticationHelper = require('./helpers/authentication.helper.js');
-const proto = grpc.load(__dirname + '/proto/user.proto');
+const proto = grpc.load(__dirname + '/proto/authentication.proto');
 const server = new grpc.Server();
 
 //define the callable methods that correspond to the methods defined in the protofile
-server.addService(proto.user.UserService.service, {
+server.addService(proto.authentication.AuthenticationService.service, {
   authenticateUser: function(call, callback){
     authenticationHelper.authenticate(call, callback);
-  },
-  createUser: function(call, callback){
-    authenticationHelper.create(call, callback);
   }
-
 });
 
 //Specify the IP and and port to start the grpc Server, no SSL in test environment

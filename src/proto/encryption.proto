@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package encryption;
+
+//Methods exposed to client
+service EncryptionService {
+  rpc encryptPassword (EncryptionRequest) returns (EncryptionReply){}
+  rpc checkPassword (EncryptionCheckRequest) returns (EncryptionCheckReply){}
+}
+
+// Message Type definition for user
+message EncryptionRequest {
+  string password = 2;
+}
+
+message EncryptionReply {
+  string encrypted = 1;
+}
+
+message EncryptionCheckRequest {
+  string password = 1;
+  string hash = 2;
+}
+
+message EncryptionCheckReply {
+  bool match = 1;
+}

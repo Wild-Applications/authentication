@@ -10,6 +10,9 @@ const server = new grpc.Server();
 server.addService(proto.authentication.AuthenticationService.service, {
   authenticateUser: function(call, callback){
     authenticationHelper.authenticate(call, callback);
+  },
+  storeUser: function(call, callback){
+    authenticationHelper.store(call, callback);
   }
 });
 

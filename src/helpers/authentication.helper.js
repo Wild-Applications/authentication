@@ -112,4 +112,51 @@ authenticator.store = function(call,callback){
   }
 }
 
+authenticator.update = function(call, callback){
+  if(call.request._id && call.request.password){
+    pool.getConnection(function(err, connection){
+      if (err) {
+        return callback({message:JSON.stringify({code:'0001', message:'Failed to connect to the database'})}, null);
+      }else{
+        connection.beginTransaction(function(err){
+          if(err){
+            return callback({message:JSON.stringify({code:'0001', message:'Failed to connect to the database'})}, null);
+          }
+          //hash the password
+          var grpc = require("grpc");
+          var encryptionDescriptor = grpc.load(__dirname + '/../proto/encryption.proto').encryption;
+          var encryptionClient = new encryptionDescriptor.EncryptionService('service.encryption:1295', grpc.credentials.createInsecure());
+
+          encryptionClient.encryptPassword({password:call.request.password},function(err, response){
+            if(err){
+              callback(err,null);
+            }else{
+              var query = "UPDATE hashes SET hash = "+ response.encrypted +" WHERE _id = " + call.request._id + ";";
+              connection.query(query, function(err, results){
+                if(err){
+                  connection.rollback(function(){
+                    return callback(err, null);
+                    return;
+                  });
+                }else{
+                  connection.commit(function(err){
+                    if(err){
+                      callback(err, null);
+                    }else{
+                      callback(null, {stored: true});
+                    }
+                  })
+                }
+              });
+            }
+          });
+        });
+        connection.release();
+      }
+    });
+  }else{
+    return callback({message:JSON.stringify({code:'0007', message:'Not all parameters were supplied'})}, null);
+  }
+}
+
 module.exports = authenticator;

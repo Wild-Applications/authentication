@@ -13,6 +13,9 @@ server.addService(proto.authentication.AuthenticationService.service, {
   },
   storeUser: function(call, callback){
     authenticationHelper.store(call, callback);
+  },
+  updateUser: function(call, callback){
+    authenticationHelper.update(call, callback);
   }
 });
 

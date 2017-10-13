@@ -6,6 +6,7 @@ package authentication;
 service AuthenticationService {
   rpc authenticateUser (AuthenticationRequest) returns (AuthenticationReply){}
   rpc storeUser (AuthenticationRequest) returns (StorageReply){}
+  rpc updateUser (AuthenticationRequest) returns (StorageReply){}
 }
 
 // Message Type definition for user

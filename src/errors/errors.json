@@ -1,0 +1,8 @@
+{
+  "0001": {"message": "Failed to connect to the database", "status": 500},
+  "0002": {"message": "Failed to run query against the database", "status": 500},
+  "0003": {"message": "Username or password did not match", "status": 401},
+  "0004": {"message": "Unable to store password", "status": 500},
+  "0005": {"message": "Not all parameters were supplied", "status": 400},
+  "0006": {"message": "Unable to update user", "status": 500}
+}

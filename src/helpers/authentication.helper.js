@@ -3,6 +3,7 @@
 
 //imports
 var mysql      = require('mysql');
+var crypto = require('crypto');
 var pool = mysql.createPool({
   connectionLimit   :  10,
   //host              : 'hashdb.c5mqjhqvtirx.us-west-2.rds.amazonaws.com',
@@ -158,41 +159,37 @@ authenticator.requestReset = function(call,callback){
       if (err) {
         return callback({message:JSON.stringify({code:'02040001', error:errors['0001']})}, null);
       }else{
+        var token = randomAsciiString(48);
+        var requestTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        encryptionClient.encryptPassword({password:token},function(err, response){
+          if(err){
+            callback(err,null);
+          }else{
+            connection.beginTransaction(function(err){
+              if(err){
+                return callback({message:JSON.stringify({code:'02050001', error:errors['0001']})}, null);
+              }
+              //hash the password
 
-        require('crypto').randomBytes(48, function(err, buffer) {
-          var token = buffer.toString('hex');
-          var requestTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-          //store hashed token so password reset requests arent tampered with
-          encryptionClient.encryptPassword({password:token},function(err, response){
-            if(err){
-              callback(err,null);
-            }else{
-              connection.beginTransaction(function(err){
+              var query = "INSERT INTO resets (guid, _id, time) VALUES ('" + response.encrypted + "', '" + call.request._id + "', '"+requestTime+"');";
+              console.log(query);
+              connection.query(query, function(err, results){
                 if(err){
-                  return callback({message:JSON.stringify({code:'02050001', error:errors['0001']})}, null);
+                  connection.rollback(function(){
+                    return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
+                  });
+                }else{
+                  connection.commit(function(err){
+                    if(err){
+                      return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
+                    }else{
+                      callback(null, {guid: response.encrypted});
+                    }
+                  })
                 }
-                //hash the password
-
-                var query = "INSERT INTO resets (guid, _id, time) VALUES ('" + response.encrypted + "', '" + call.request._id + "', '"+requestTime+"');";
-                console.log(query);
-                connection.query(query, function(err, results){
-                  if(err){
-                    connection.rollback(function(){
-                      return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
-                    });
-                  }else{
-                    connection.commit(function(err){
-                      if(err){
-                        return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
-                      }else{
-                        callback(null, {guid: response.encrypted});
-                      }
-                    })
-                  }
-                });
               });
-            }
-          });
+            });
+          }
         });
         connection.release();
       }
@@ -200,6 +197,36 @@ authenticator.requestReset = function(call,callback){
   }else{
     return callback({message:JSON.stringify({code:'02020005', error:errors['0005']})}, null);
   }
+}
+
+
+function randomString(length, chars) {
+  if (!chars) {
+    throw new Error('Argument \'chars\' is undefined');
+  }
+
+  var charsLength = chars.length;
+  if (charsLength > 256) {
+    throw new Error('Argument \'chars\' should not have more than 256 characters'
+      + ', otherwise unpredictability will be broken');
+  }
+
+  var randomBytes = crypto.randomBytes(length);
+  var result = new Array(length);
+
+  var cursor = 0;
+  for (var i = 0; i < length; i++) {
+    cursor += randomBytes[i];
+    result[i] = chars[cursor % charsLength];
+  }
+
+  return result.join('');
+}
+
+/** Sync */
+function randomAsciiString(length) {
+  return randomString(length,
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
 }
 
 module.exports = authenticator;

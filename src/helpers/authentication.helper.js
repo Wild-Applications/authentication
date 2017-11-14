@@ -232,7 +232,7 @@ authenticator.resetPassword = function(call, callback){
                             if(err){
                               return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
                             }else{
-                              callback(null, {stored: true});
+                              callback(null, {reset: true});
                             }
                           })
                         }

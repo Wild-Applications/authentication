@@ -2,8 +2,11 @@
 //Username and Password Login
 
 //imports
-var mysql      = require('mysql');
 var crypto = require('crypto');
+var base64url = require('base64url');
+
+
+var mysql      = require('mysql');
 var pool = mysql.createPool({
   connectionLimit   :  10,
   //host              : 'hashdb.c5mqjhqvtirx.us-west-2.rds.amazonaws.com',
@@ -159,7 +162,7 @@ authenticator.requestReset = function(call,callback){
       if (err) {
         return callback({message:JSON.stringify({code:'02040001', error:errors['0001']})}, null);
       }else{
-        var token = randomAsciiString(48);
+        var token = randomStringAsBase64Url(48).substring(0,48);
         var requestTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
         encryptionClient.encryptPassword({password:token},function(err, response){
           if(err){
@@ -200,33 +203,8 @@ authenticator.requestReset = function(call,callback){
 }
 
 
-function randomString(length, chars) {
-  if (!chars) {
-    throw new Error('Argument \'chars\' is undefined');
-  }
-
-  var charsLength = chars.length;
-  if (charsLength > 256) {
-    throw new Error('Argument \'chars\' should not have more than 256 characters'
-      + ', otherwise unpredictability will be broken');
-  }
-
-  var randomBytes = crypto.randomBytes(length);
-  var result = new Array(length);
-
-  var cursor = 0;
-  for (var i = 0; i < length; i++) {
-    cursor += randomBytes[i];
-    result[i] = chars[cursor % charsLength];
-  }
-
-  return result.join('');
-}
-
-/** Sync */
-function randomAsciiString(length) {
-  return randomString(length,
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789');
+function randomStringAsBase64Url(size) {
+  return base64url(crypto.randomBytes(size));
 }
 
 module.exports = authenticator;

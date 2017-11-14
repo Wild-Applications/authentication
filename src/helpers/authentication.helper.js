@@ -174,6 +174,7 @@ authenticator.requestReset = function(call,callback){
                 //hash the password
 
                 var query = "INSERT INTO resets (guid, _id, time) VALUES ('" + response.encrypted + "', '" + call.request._id + "', '"+requestTime+"');";
+                console.log(query);
                 connection.query(query, function(err, results){
                   if(err){
                     connection.rollback(function(){

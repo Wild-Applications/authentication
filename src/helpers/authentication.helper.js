@@ -129,12 +129,12 @@ authenticator.update = function(call, callback){
               connection.query(query, function(err, results){
                 if(err){
                   connection.rollback(function(){
-                    return callback(message:JSON.stringify({code:'02000006', error:errors['0006']}), null);
+                    return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
                   });
                 }else{
                   connection.commit(function(err){
                     if(err){
-                      return callback(message:JSON.stringify({code:'02010006', error:errors['0006']}), null);
+                      return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
                     }else{
                       callback(null, {stored: true});
                     }
@@ -177,12 +177,12 @@ authenticator.requestReset = function(call,callback){
                 connection.query(query, function(err, results){
                   if(err){
                     connection.rollback(function(){
-                      return callback(message:JSON.stringify({code:'02000006', error:errors['0006']}), null);
+                      return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
                     });
                   }else{
                     connection.commit(function(err){
                       if(err){
-                        return callback(message:JSON.stringify({code:'02010006', error:errors['0006']}), null);
+                        return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
                       }else{
                         callback(null, {resetSent: true});
                       }

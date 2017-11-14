@@ -164,35 +164,30 @@ authenticator.requestReset = function(call,callback){
       }else{
         var token = randomStringAsBase64Url(48).substring(0,48);
         var requestTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        encryptionClient.encryptPassword({password:token},function(err, response){
-          if(err){
-            callback(err,null);
-          }else{
-            connection.beginTransaction(function(err){
-              if(err){
-                return callback({message:JSON.stringify({code:'02050001', error:errors['0001']})}, null);
-              }
-              //hash the password
 
-              var query = "INSERT INTO resets (guid, _id, time) VALUES ('" + response.encrypted + "', '" + call.request._id + "', '"+requestTime+"');";
-              console.log(query);
-              connection.query(query, function(err, results){
-                if(err){
-                  connection.rollback(function(){
-                    return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
-                  });
-                }else{
-                  connection.commit(function(err){
-                    if(err){
-                      return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
-                    }else{
-                      callback(null, {guid: token});
-                    }
-                  })
-                }
-              });
-            });
+        var hash = crypto.createHash('sha1').update(token).digest('hex');
+
+
+        connection.beginTransaction(function(err){
+          if(err){
+            return callback({message:JSON.stringify({code:'02050001', error:errors['0001']})}, null);
           }
+          var query = "INSERT INTO resets (guid, _id, time) VALUES ('" + hash + "', '" + call.request._id + "', '"+requestTime+"');";
+          connection.query(query, function(err, results){
+            if(err){
+              connection.rollback(function(){
+                return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
+              });
+            }else{
+              connection.commit(function(err){
+                if(err){
+                  return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
+                }else{
+                  callback(null, {guid: token});
+                }
+              })
+            }
+          });
         });
         connection.release();
       }
@@ -201,6 +196,66 @@ authenticator.requestReset = function(call,callback){
     return callback({message:JSON.stringify({code:'02020005', error:errors['0005']})}, null);
   }
 }
+
+authenticator.resetPassword = function(call, callback){
+  if(call.request.guid && call.request.password){
+    pool.getConnection(function(err, connection){
+      if (err) {
+        return callback({message:JSON.stringify({code:'02050001', error:errors['0001']})}, null);
+      }else{
+        //hash the guid
+        var hash = crypto.createHash('sha1').update(call.request.guid).digest('hex');
+
+        connection.beginTransaction(function(err){
+          if(err){
+            return callback({message:JSON.stringify({code:'02060001', error:errors['0001']})}, null);
+          }
+          var query = "SELECT * FROM resets WHERE guid = '" + hash + "';";
+          connection.query(query, function(err, results){
+              if(err){
+                return callback({message:JSON.stringify({code:'02001002', error:errors['0006']})}, null);
+              }
+              if(typeof results != 'undefined'){
+                if(results.length != 0){
+                  encryptionClient.encryptPassword({password:call.request.password},function(err, response){
+                    if(err){
+                      callback(err,null);
+                    }else{
+                      var query = "UPDATE hashes SET hash = "+ response.encrypted +" WHERE _id = " + results[0]._id + ";";
+                      connection.query(query, function(err, results){
+                        if(err){
+                          connection.rollback(function(){
+                            return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
+                          });
+                        }else{
+                          connection.commit(function(err){
+                            if(err){
+                              return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
+                            }else{
+                              callback(null, {stored: true});
+                            }
+                          })
+                        }
+                      });
+                    }
+                  });
+                }else{
+                  return callback({message:JSON.stringify({code:'02010007', error:errors['0007']})}, null);
+                }
+              }else{
+                return callback({message:JSON.stringify({code:'02000007', error:errors['0007']})}, null);
+              }
+          });
+        });
+
+
+        connection.release();
+      }
+    });
+  }else{
+    return callback({message:JSON.stringify({code:'02030005', error:errors['0005']})}, null);
+  }
+};
 
 
 function randomStringAsBase64Url(size) {

@@ -183,7 +183,7 @@ authenticator.requestReset = function(call,callback){
                     if(err){
                       return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
                     }else{
-                      callback(null, {guid: response.encrypted});
+                      callback(null, {guid: token});
                     }
                   })
                 }

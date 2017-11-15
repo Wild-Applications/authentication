@@ -114,7 +114,7 @@ authenticator.store = function(call,callback){
   }
 }
 
-authenticator.update = function(call, callback){
+/*authenticator.update = function(call, callback){
   if(call.request._id && call.request.password){
     pool.getConnection(function(err, connection){
       if (err) {
@@ -154,7 +154,7 @@ authenticator.update = function(call, callback){
   }else{
     return callback({message:JSON.stringify({code:'02010005', error:errors['0005']})}, null);
   }
-}
+}*/
 
 authenticator.requestReset = function(call,callback){
   if(call.request._id){
@@ -197,7 +197,7 @@ authenticator.requestReset = function(call,callback){
   }
 }
 
-authenticator.resetPassword = function(call, callback){
+/*authenticator.resetPassword = function(call, callback){
   if(call.request.guid && call.request.password){
     pool.getConnection(function(err, connection){
       if (err) {
@@ -256,7 +256,7 @@ authenticator.resetPassword = function(call, callback){
     return callback({message:JSON.stringify({code:'02030005', error:errors['0005']})}, null);
   }
 };
-
+*/
 
 function randomStringAsBase64Url(size) {
   return base64url(crypto.randomBytes(size));

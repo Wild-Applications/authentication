@@ -200,11 +200,7 @@ authenticator.requestReset = function(call,callback){
 }
 
 authenticator.resetPassword = function(call, callback){
-  console.log('getting here');
-  console.log(call.request.guid);
-  console.log(call.request.password);
-  console.log(call.request.guid && call.request.guid.length > 0 && call.request.password > 0);
-  if(call.guid && call.guid.length > 0 && call.request.password > 0){
+  if(call.guid && call.guid.length > 0 && call.request.password.length > 0){
     pool.getConnection(function(err, connection){
         if(err){
           return callback({message: JSON.stringify({code:'02050001', error: errors['0001']})}, null);

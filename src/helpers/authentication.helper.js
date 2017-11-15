@@ -200,6 +200,8 @@ authenticator.requestReset = function(call,callback){
 }
 
 authenticator.resetPassword = function(call, callback){
+  console.log('getting here');
+  console.log(call.guid && call.guid.length > 0 && call.request.password > 0);
   if(call.guid && call.guid.length > 0 && call.request.password > 0){
     pool.getConnection(function(err, connection){
         if(err){
@@ -266,6 +268,8 @@ authenticator.resetPassword = function(call, callback){
           });
         });
     });
+  }else{
+    return callback({message:JSON.stringify({code:'02050005', error:errors['0005']})}, null);
   }
 }
 

@@ -233,6 +233,7 @@ authenticator.resetPassword = function(call, callback){
                     callback(err,null);
                   }else{
                     var query = "UPDATE hashes SET hash = '"+ response.encrypted +"' WHERE _id = " + results[0]._id + ";";
+                    console.log('update query', query);
                     connection.query(query, function(err, results){
                       if(err){
                         console.log(err);

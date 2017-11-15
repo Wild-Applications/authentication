@@ -5,6 +5,8 @@
 var crypto = require('crypto');
 var base64url = require('base64url');
 
+var timeHelper = require('./time.helper.js');
+
 
 var mysql      = require('mysql');
 var pool = mysql.createPool({
@@ -194,6 +196,76 @@ authenticator.requestReset = function(call,callback){
     });
   }else{
     return callback({message:JSON.stringify({code:'02020005', error:errors['0005']})}, null);
+  }
+}
+
+authenticator.resetPassword = function(call, callback){
+  if(call.guid && call.guid.length > 0 && call.request.password > 0){
+    pool.getConnection(function(err, connection){
+        if(err){
+          return callback({message: JSON.stringify({code:'02050001'. error: errors['0001']})}, null);
+        }
+        //guid is stored as a hash
+        //hash the passed guid so we can retrieve the user id from the database
+        var hash = crypto.createHash('sha1').update(call.request.guid).digest('hex');
+
+        connection.beginTransaction(function(err){
+          if(err){
+            connection.release();
+            return callback({message:JSON.stringify({code:'02060001', error:errors['0001']})}, null);
+          }
+          var query = "SELECT * FROM resets WHERE guid = '"+hash+"';";
+          connection.query(query, function(err, results){
+            if(err){
+              connection.release();
+              return callback({message:JSON.stringify({code:'02001002', error:errors['0006']})}, null);
+            }
+            if(typeof results != 'undefined' && results.length != 0){
+              //now check the request hasnt expired
+              var isValid = timeHelper.isWithinHours(results[0].time, 4);
+              if(isValid){
+                //is within the valid time period, so honour the request and reset the password
+                encryptionClient.encryptPassword({password:call.request.password},function(err, response){
+                  if(err){
+                    callback(err,null);
+                  }else{
+                    var query = "UPDATE hashes SET hash = "+ response.encrypted +" WHERE _id = " + results[0]._id + ";";
+                    connection.query(query, function(err, results){
+                      if(err){
+                        connection.rollback(function(){
+                          return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
+                        });
+                      }else{
+                        connection.commit(function(err){
+                          if(err){
+                            return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
+                          }else{
+                            callback(null, {reset: true});
+                          }
+                        })
+                      }
+                    });
+                  }
+                });
+              }else{
+                var deleteQuery = "DELETE FROM resets WHERE guid = '"+hash+"';"
+                connection.query(deleteQuery, function(err, result){
+                  if(!err){
+                    connection.commit(function(err){
+                      return callback({message:JSON.stringify({code:'02000008', error:errors['0008']})}, null);
+                    });
+                  }else{
+                    return callback({message:JSON.stringify({code:'02010008', error:errors['0008']})}, null);
+                  }
+                });
+              }
+            }else{
+              connection.release();
+              return callback({message:JSON.stringify({code:'02000007', error:errors['0007']})}, null);
+            }
+          });
+        });
+    });
   }
 }
 

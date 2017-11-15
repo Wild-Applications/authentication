@@ -16,6 +16,9 @@ server.addService(proto.authentication.AuthenticationService.service, {
   },
   requestReset: function(call, callback){
     authenticationHelper.requestReset(call, callback);
+  },
+  resetPassword: function(call, callback){
+    authenticationHelper.reset(call, callback);
   }
 });
 

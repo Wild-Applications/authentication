@@ -5,5 +5,6 @@
   "0004": {"message": "Unable to store password", "status": 500},
   "0005": {"message": "Not all parameters were supplied", "status": 400},
   "0006": {"message": "Unable to update user", "status": 500},
-  "0007": {"message": "Unable to reset password", "status": 403}
+  "0007": {"message": "Unable to reset password", "status": 403},
+  "0008": {"message": "Reset request has expired", "status": 401}
 }

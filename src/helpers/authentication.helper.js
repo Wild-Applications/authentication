@@ -203,7 +203,7 @@ authenticator.resetPassword = function(call, callback){
   if(call.guid && call.guid.length > 0 && call.request.password > 0){
     pool.getConnection(function(err, connection){
         if(err){
-          return callback({message: JSON.stringify({code:'02050001'. error: errors['0001']})}, null);
+          return callback({message: JSON.stringify({code:'02050001', error: errors['0001']})}, null);
         }
         //guid is stored as a hash
         //hash the passed guid so we can retrieve the user id from the database

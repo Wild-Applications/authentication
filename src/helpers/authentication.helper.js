@@ -208,13 +208,14 @@ authenticator.resetPassword = function(call, callback){
         //guid is stored as a hash
         //hash the passed guid so we can retrieve the user id from the database
         var hash = crypto.createHash('sha1').update(call.request.guid).digest('hex');
-
+        console.log("hash ", hash);
         connection.beginTransaction(function(err){
           if(err){
             connection.release();
             return callback({message:JSON.stringify({code:'02060001', error:errors['0001']})}, null);
           }
           var query = "SELECT * FROM resets WHERE guid = '"+hash+"';";
+          console.log("query ", query);
           connection.query(query, function(err, results){
             if(err){
               connection.release();
@@ -222,7 +223,9 @@ authenticator.resetPassword = function(call, callback){
             }
             if(typeof results != 'undefined' && results.length != 0){
               //now check the request hasnt expired
+              console.log("time " , results[0].time);
               var isValid = timeHelper.isWithinHours(results[0].time, 4);
+              console.log("is valid ", isValid);
               if(isValid){
                 //is within the valid time period, so honour the request and reset the password
                 encryptionClient.encryptPassword({password:call.request.password},function(err, response){

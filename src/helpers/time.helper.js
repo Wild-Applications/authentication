@@ -3,7 +3,7 @@ var moment = require('moment');
 var time = {};
 
 time.isWithinHours = function(dateToTest, numOfHours){
-  return moment(dateToTest).diff(moment(), 'hours') < numOfHours;
+  return moment().diff(moment(dateToTest), 'hours') < numOfHours;
 }
 
 module.exports = time;

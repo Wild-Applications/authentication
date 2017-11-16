@@ -238,7 +238,7 @@ authenticator.resetPassword = function(call, callback){
                       if(err){
                         console.log(err);
                         connection.rollback(function(){
-                          return callback({name: '02000006', message:errors['0006'].message})}, null);
+                          return callback({name: '02000006', message:errors['0006'].message}, null);
                         });
                       }else{
                         connection.commit(function(err){

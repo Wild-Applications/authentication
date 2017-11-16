@@ -243,7 +243,7 @@ authenticator.resetPassword = function(call, callback){
                       }else{
                         connection.commit(function(err){
                           if(err){
-                            return callback({name: '02010006', message:errors['0006'].message})}, null);
+                            return callback({name: '02010006', message:errors['0006'].message}, null);
                           }else{
                             callback(null, {reset: true});
                             var deleteQuery = "DELETE FROM resets WHERE guid = '"+hash+"';"

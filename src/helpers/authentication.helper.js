@@ -274,7 +274,7 @@ authenticator.resetPassword = function(call, callback){
               }
             }else{
               connection.release();
-              return callback({message:JSON.stringify({code:'02000007', error:errors['0007']})}, null);
+              return callback({name: '02000007', message:errors['0007'].message}, null);
             }
           });
         });

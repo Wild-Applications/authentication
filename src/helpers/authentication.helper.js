@@ -238,14 +238,22 @@ authenticator.resetPassword = function(call, callback){
                       if(err){
                         console.log(err);
                         connection.rollback(function(){
-                          return callback({message:JSON.stringify({code:'02000006', error:errors['0006']})}, null);
+                          return callback({name: '02000006', message:errors['0006'].message})}, null);
                         });
                       }else{
                         connection.commit(function(err){
                           if(err){
-                            return callback({message:JSON.stringify({code:'02010006', error:errors['0006']})}, null);
+                            return callback({name: '02010006', message:errors['0006'].message})}, null);
                           }else{
                             callback(null, {reset: true});
+                            var deleteQuery = "DELETE FROM resets WHERE guid = '"+hash+"';"
+                            connection.query(deleteQuery, function(err, result){
+                              if(!err){
+                                connection.commit(function(err){
+
+                                });
+                              }
+                            });
                           }
                         })
                       }

@@ -14,7 +14,7 @@ var pool = mysql.createPool({
   //host              : 'hashdb.c5mqjhqvtirx.us-west-2.rds.amazonaws.com',
   host              : process.env.DB_HOST,
   port              : '3306',
-  user              : provess.env.DB_USER,
+  user              : process.env.DB_USER,
   password          : process.env.DB_PASS,
   database          : process.env.DB_DATABASE
 });

@@ -25,6 +25,32 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 50051
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secret
+              key: secret
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: db
+              key: db-pass
+        - name: DB_HOST
+          valueFrom:
+            secretKeyRef:
+              name: db
+              key: db-host
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: db
+              key: db-user
+        - name: DB_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: db
+              key: db-database
 ---
 apiVersion: v1
 kind: Service

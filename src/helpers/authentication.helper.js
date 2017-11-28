@@ -298,7 +298,7 @@ authenticator.changePassword = (call, callback) => {
             var query = "SELECT hash FROM hashes WHERE _id = '" + token.sub + "'";
             connection.query(query, function(error, results){
               if(err){
-                return callback({message:errors['0002'].message, errors['0002'].code}, null);
+                return callback({message:errors['0002'].message, code:errors['0002'].code}, null);
               }else{
                 if(typeof results != 'undefined'){
                   if(results.length != 0){

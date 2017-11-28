@@ -1,10 +1,12 @@
 {
-  "0001": {"message": "Failed to connect to the database", "status": 500},
+  "0001": {"message": "Failed to connect to the database", "status": 500, "code": 500},
   "0002": {"message": "Failed to run query against the database", "status": 500},
   "0003": {"message": "Username or password did not match", "status": 401},
-  "0004": {"message": "Unable to store password", "status": 500},
-  "0005": {"message": "Not all parameters were supplied", "status": 400},
+  "0004": {"message": "Unable to store password", "status": 500, "code": 500},
+  "0005": {"message": "Not all parameters were supplied", "status": 400, "code": 400},
   "0006": {"message": "Unable to update user", "status": 500},
   "0007": {"message": "Unable to reset password", "status": 403},
-  "0008": {"message": "Reset request has expired", "status": 401}
+  "0008": {"message": "Reset request has expired", "status": 401},
+  "0009": {"message": "Original password did not match", "code": 400},
+  "0010": {"message": "New password cannot be the same as the old password", "code": 400}
 }

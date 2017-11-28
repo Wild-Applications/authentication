@@ -284,6 +284,90 @@ authenticator.resetPassword = function(call, callback){
   }
 }
 
+authenticator.changePassword = (call, callback) => {
+  jwt.verify(call.metadata.get('authorization')[0], process.env.JWT_SECRET, function(err, token){
+    if(err){
+      return callback({message:err},null);
+    }
+    if(call.request.original && call.request.new){
+      if(call.request.original !== call.request.new){
+        pool.getConnection(function(err, connection) {
+          if (err) {
+            return callback({message:errors['0001'].message, code:errors['0001'].code}, null);
+          }else{
+            var query = "SELECT hash FROM hashes WHERE _id = '" + token.sub + "'";
+            connection.query(query, function(error, results){
+              if(err){
+                return callback({message:errors['0002'].message, errors['0002'].code}, null);
+              }else{
+                if(typeof results != 'undefined'){
+                  if(results.length != 0){
+                    var body = {};
+                    body.password = call.request.original;
+                    body.hash = results[0].hash;
+                    //id exists
+                    //make call to encryption service to check if they match
+                    encryptionClient.checkPassword(body,function(err, response){
+                      if(err){
+                        callback(err,null);
+                      }else{
+                        if(response.match){
+                          //original password matched so we can change to new one now.
+                          connection.beginTransaction(function(err){
+                            if(err){
+                              return callback({message:errors['0001'].message, code:errors['0001'].code}, null);
+                            }
+                            //hash the password
+                            encryptionClient.encryptPassword({password:call.request.new},function(err, response){
+                              if(err){
+                                callback(err,null);
+                              }else{
+                                var query = "UPDATE hashes SET hash = '"+ response.encrypted +"' WHERE _id = " + token.sub + ";"
+                                connection.query(query, function(err, results){
+                                  if(err){
+                                    connection.rollback(function(){
+                                      return callback({message:errors['0004'].message, code: errors['0004'].code}, null);
+                                    });
+                                  }else{
+                                    connection.commit(function(err){
+                                      if(err){
+                                        return callback({message:errors['0004'].message, code: errors['0004'].code}, null);
+                                      }else{
+                                        callback(null, {stored: true});
+                                      }
+                                    })
+                                  }
+                                });
+                              }
+                            });
+                          });
+                        }else{
+                          //original password wasnt correct so deny request
+                          return callback({message:errors['0009'].message, code:errors['0009'].code},null);
+                        }
+                      }
+                    });
+                  }else{
+                    //no results
+                    return callback({message:JSON.stringify({code:'02000003', error:errors['0003']})}, null);
+                  }
+                }else{
+                  return callback({message:JSON.stringify({code:'02010003', error:errors['0003']})}, null);
+                }
+              }
+            });
+          }
+        });
+      }else{
+          //new password cant be same as old
+          return callback({message:errors['0010'].message, code:errors['0010'].code},null);
+      }
+    }else{
+      return callback({message:errors['0005'].message, code:errors['0005'].code}, null);
+    }
+  });
+};
+
 /*authenticator.resetPassword = function(call, callback){
   if(call.request.guid && call.request.password){
     pool.getConnection(function(err, connection){

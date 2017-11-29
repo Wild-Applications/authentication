@@ -287,6 +287,7 @@ authenticator.resetPassword = function(call, callback){
 authenticator.changePassword = (call, callback) => {
   jwt.verify(call.metadata.get('authorization')[0], process.env.JWT_SECRET, function(err, token){
     if(err){
+      console.log(err);
       return callback({message:err},null);
     }
     if(call.request.original && call.request.new){

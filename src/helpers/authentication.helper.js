@@ -334,7 +334,7 @@ authenticator.changePassword = (call, callback) => {
                                       if(err){
                                         return callback({message:errors['0004'].message, code: errors['0004'].code}, null);
                                       }else{
-                                        callback(null, {stored: true});
+                                        callback(null, {});
                                       }
                                     })
                                   }

@@ -11,8 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "grpc": "1.7.2",
-    "jsonwebtoken": "^7.4.1",
+    "jsonwebtoken": "8.1.0",
     "moment": "^2.19.2",
-    "mysql": "8.1.0"
+    "mysql": "2.15.0"
   }
 }

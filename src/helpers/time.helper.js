@@ -7,3 +7,4 @@ time.isWithinHours = function(dateToTest, numOfHours){
 }
 
 module.exports = time;
+//tests

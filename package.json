@@ -12,7 +12,7 @@
   "dependencies": {
     "grpc": "1.7.2",
     "jsonwebtoken": "^7.4.1",
-    "moment": "8.1.0",
-    "mysql": "2.15.0"
+    "moment": "^2.19.2",
+    "mysql": "8.1.0"
   }
 }

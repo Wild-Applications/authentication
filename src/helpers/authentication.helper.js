@@ -12,11 +12,11 @@ var mysql      = require('mysql');
 var pool = mysql.createPool({
   connectionLimit   :  10,
   //host              : 'hashdb.c5mqjhqvtirx.us-west-2.rds.amazonaws.com',
-  host              : process.env.DB_HOST,
+  host              : '127.0.0.1',
   port              : '3306',
   user              : process.env.DB_USER,
   password          : process.env.DB_PASS,
-  database          : process.env.DB_DATABASE
+  database          : authdb
 });
 
 var grpc = require("grpc");

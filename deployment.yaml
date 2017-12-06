@@ -43,23 +43,39 @@ spec:
         - name: DB_PASS
           valueFrom:
             secretKeyRef:
-              name: db
-              key: db-pass
-        - name: DB_HOST
-          valueFrom:
-            secretKeyRef:
-              name: db
-              key: db-host
+              name: cloudsql-db-credentials
+              key: password
         - name: DB_USER
           valueFrom:
             secretKeyRef:
-              name: db
-              key: db-user
-        - name: DB_DATABASE
-          valueFrom:
-            secretKeyRef:
-              name: db
-              key: db-database
+              name: cloudsql-db-credentials
+              key: username
+      # [START proxy_container]
+      - name: cloudsql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                  "-instances=wildapps-tab:europe-west3:wildappsuserdb=tcp:3306",
+                  "-credential_file=/secrets/cloudsql/credentials.json"]
+        volumeMounts:
+          - name: cloudsql-instance-credentials
+            mountPath: /secrets/cloudsql
+            readOnly: true
+          - name: ssl-certs
+            mountPath: /etc/ssl/certs
+          - name: cloudsql
+            mountPath: /cloudsql
+      # [END proxy_container]
+      # [START volumes]
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        - name: cloudsql
+          emptyDir:
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+      # [END volumes]
 ---
 apiVersion: v1
 kind: Service
